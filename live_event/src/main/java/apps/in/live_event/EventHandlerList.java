@@ -8,11 +8,11 @@ import java.util.Iterator;
 import java.util.Set;
 
 
-class EventHandlerList implements Iterable<EventHandlerWrapper> {
+class EventHandlerList<T> implements Iterable<EventHandlerWrapper<T>> {
 
-    public class ListIterator implements Iterator<EventHandlerWrapper>{
+    public class ListIterator implements Iterator<EventHandlerWrapper<T>>{
 
-        private Node next = head;
+        private Node<T> next = head;
 
         @Override
         public boolean hasNext() {
@@ -20,37 +20,37 @@ class EventHandlerList implements Iterable<EventHandlerWrapper> {
         }
 
         @Override
-        public EventHandlerWrapper next() {
+        public EventHandlerWrapper<T> next() {
             EventHandlerWrapper value = next.value;
             next = next.nextNode;
             return value;
         }
     }
 
-    private static class Node{
+    private static class Node<T>{
 
-        private final EventHandlerWrapper value;
-        private Node nextNode;
+        private final EventHandlerWrapper<T> value;
+        private Node<T> nextNode;
 
-        public Node(EventHandlerWrapper value, Node nextNode) {
+        public Node(EventHandlerWrapper<T> value, Node<T> nextNode) {
             this.value = value;
             this.nextNode = nextNode;
         }
     }
 
-    private Node head = null;
+    private Node<T> head = null;
 
-    public void add(EventHandlerWrapper e){
-        Node node = new Node(e, head);
+    public void add(EventHandlerWrapper<T> e){
+        Node<T> node = new Node<>(e, head);
         head = node;
     }
 
     public Set<LifecycleOwner> remove(Object obj){
         Set<LifecycleOwner> lifecycleOwnerSet = new HashSet<>();
-        Node previousNode = null;
-        Node currentNode = head;
+        Node<T> previousNode = null;
+        Node<T> currentNode = head;
         while (currentNode != null){
-            EventHandlerWrapper eventHandlerWrapper = currentNode.value;
+            EventHandlerWrapper<T> eventHandlerWrapper = currentNode.value;
             if (eventHandlerWrapper.equals(obj)){
                 LifecycleOwner lifecycleOwner = eventHandlerWrapper.getLifecycleOwner();
                 if (lifecycleOwner != null){
@@ -70,7 +70,7 @@ class EventHandlerList implements Iterable<EventHandlerWrapper> {
     }
 
     public boolean contains(Object obj){
-        for (EventHandlerWrapper eventHandlerWrapper : this){
+        for (EventHandlerWrapper<T> eventHandlerWrapper : this){
             if (eventHandlerWrapper.equals(obj)){
                 return true;
             }
@@ -80,7 +80,7 @@ class EventHandlerList implements Iterable<EventHandlerWrapper> {
 
     @NonNull
     @Override
-    public Iterator<EventHandlerWrapper> iterator() {
+    public Iterator<EventHandlerWrapper<T>> iterator() {
         return new ListIterator();
     }
 }

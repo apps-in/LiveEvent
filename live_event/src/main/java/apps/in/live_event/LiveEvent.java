@@ -2,10 +2,10 @@ package apps.in.live_event;
 
 import androidx.lifecycle.LifecycleOwner;
 
-public interface LiveEvent {
-    void subscribe(EventHandler eventHandler);
-    void subscribe(LifecycleOwner lifecycleOwner, EventHandler eventHandler);
-    void subscribeOnMainThread(EventHandler eventHandler);
-    void subscribeOnMainThread(LifecycleOwner lifecycleOwner, EventHandler eventHandler);
-    void unsubscribe(EventHandler eventHandler);
+public interface LiveEvent<T> {
+    void subscribe(EventHandler<T> eventHandler);
+    void subscribe(LifecycleOwner lifecycleOwner, EventHandler<T> eventHandler);
+    void subscribeOnMainThread(EventHandler<T> eventHandler);
+    void subscribeOnMainThread(LifecycleOwner lifecycleOwner, EventHandler<T> eventHandler);
+    void unsubscribe(EventHandler<T> eventHandler);
 }

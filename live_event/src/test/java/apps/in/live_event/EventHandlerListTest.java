@@ -29,7 +29,7 @@ public class EventHandlerListTest {
     }
 
     private ArrayList<EventHandlerWrapper> mockList;
-    private EventHandlerList list;
+    private EventHandlerList<Object> list;
 
     @Before
     public void populateList(){
@@ -37,7 +37,7 @@ public class EventHandlerListTest {
         mockList.add(new EventHandlerWrapper(firstEventHandler, firstLifeCycleOwner, false));
         mockList.add(new EventHandlerWrapper(secondEventHandler, firstLifeCycleOwner, false));
         mockList.add(Mockito.mock(EventHandlerWrapper.class));
-        list = new EventHandlerList();
+        list = new EventHandlerList<>();
         for (int i = 2; i >= 0; i--) {
             list.add(mockList.get(i));
         }

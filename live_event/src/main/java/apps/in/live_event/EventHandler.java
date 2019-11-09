@@ -1,7 +1,7 @@
 package apps.in.live_event;
 
-public interface EventHandler {
+public interface EventHandler<T> {
 
-    void onEvent();
+    void onEvent(T eventData);
 
 }

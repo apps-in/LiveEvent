@@ -13,41 +13,41 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PostableLiveEvent implements LiveEvent, LifecycleObserver {
+public class PostableLiveEvent<T> implements LiveEvent<T>, LifecycleObserver {
 
-    private EventHandlerList handlerList = new EventHandlerList();
+    private EventHandlerList<T> handlerList = new EventHandlerList<>();
 
     private ExecutorService backgroundThreadPool;
     private Handler mainThreadHandler;
 
-    public void post(){
-        notifyListeners();
+    public void post(T eventData){
+        notifyListeners(eventData);
     }
 
     @Override
-    public void subscribe(@NonNull EventHandler eventHandler) {
-        addHandler(new EventHandlerWrapper(eventHandler, null, false));
+    public void subscribe(@NonNull EventHandler<T> eventHandler) {
+        addHandler(new EventHandlerWrapper<>(eventHandler, null, false));
     }
 
     @Override
-    public void subscribe(@NonNull LifecycleOwner lifecycleOwner, @NonNull EventHandler eventHandler) {
-        addHandler(new EventHandlerWrapper(eventHandler, lifecycleOwner, false));
+    public void subscribe(@NonNull LifecycleOwner lifecycleOwner, @NonNull EventHandler<T> eventHandler) {
+        addHandler(new EventHandlerWrapper<>(eventHandler, lifecycleOwner, false));
         observeLifecycle(lifecycleOwner);
     }
 
     @Override
-    public void subscribeOnMainThread(@NonNull EventHandler eventHandler) {
-        addHandler(new EventHandlerWrapper(eventHandler, null, true));
+    public void subscribeOnMainThread(@NonNull EventHandler<T> eventHandler) {
+        addHandler(new EventHandlerWrapper<>(eventHandler, null, true));
     }
 
     @Override
-    public void subscribeOnMainThread(@NonNull LifecycleOwner lifecycleOwner, @NonNull EventHandler eventHandler) {
-        addHandler(new EventHandlerWrapper(eventHandler, lifecycleOwner, true));
+    public void subscribeOnMainThread(@NonNull LifecycleOwner lifecycleOwner, @NonNull EventHandler<T> eventHandler) {
+        addHandler(new EventHandlerWrapper<>(eventHandler, lifecycleOwner, true));
         observeLifecycle(lifecycleOwner);
     }
 
     @Override
-    public void unsubscribe(@NonNull EventHandler eventHandler) {
+    public void unsubscribe(@NonNull EventHandler<T> eventHandler) {
         removeHandler(eventHandler);
     }
 
@@ -56,7 +56,7 @@ public class PostableLiveEvent implements LiveEvent, LifecycleObserver {
         removeHandler(lifecycleOwner);
     }
 
-    private synchronized void addHandler(EventHandlerWrapper handlerWrapper){
+    private synchronized void addHandler(EventHandlerWrapper<T> handlerWrapper){
         handlerList.add(handlerWrapper);
     }
 
@@ -69,8 +69,8 @@ public class PostableLiveEvent implements LiveEvent, LifecycleObserver {
         }
     }
 
-    private synchronized void notifyListeners(){
-        for (final EventHandlerWrapper handlerWrapper : handlerList){
+    private synchronized void notifyListeners(T eventData){
+        for (final EventHandlerWrapper<T> handlerWrapper : handlerList){
             LifecycleOwner lifecycleOwner = handlerWrapper.getLifecycleOwner();
             if (lifecycleOwner != null){
                 Lifecycle.State currentState = lifecycleOwner.getLifecycle().getCurrentState();
@@ -78,27 +78,27 @@ public class PostableLiveEvent implements LiveEvent, LifecycleObserver {
                     continue;
                 }
             }
-            EventHandler eventHandler = handlerWrapper.getEventHandler();
+            EventHandler<T> eventHandler = handlerWrapper.getEventHandler();
             if (handlerWrapper.isMainThreadNeeded()){
-                executeInMainThread(eventHandler);
+                executeInMainThread(eventHandler, eventData);
             } else {
-                executeInBackground(eventHandler);
+                executeInBackground(eventHandler, eventData);
             }
         }
     }
 
-    private void executeInMainThread(EventHandler eventHandler){
+    private void executeInMainThread(EventHandler<T> eventHandler, T eventData){
         if (mainThreadHandler == null){
             mainThreadHandler = new Handler(Looper.getMainLooper());
         }
-        mainThreadHandler.post(eventHandler::onEvent);
+        mainThreadHandler.post(() -> eventHandler.onEvent(eventData));
     }
 
-    private void executeInBackground(EventHandler eventHandler){
+    private void executeInBackground(EventHandler eventHandler, T eventData){
         if (backgroundThreadPool == null){
             backgroundThreadPool = Executors.newCachedThreadPool();
         }
-        backgroundThreadPool.execute(eventHandler::onEvent);
+        backgroundThreadPool.execute(() -> eventHandler.onEvent(eventData));
     }
 
     private synchronized void observeLifecycle(LifecycleOwner lifecycleOwner){

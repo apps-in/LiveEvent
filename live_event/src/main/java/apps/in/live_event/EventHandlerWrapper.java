@@ -3,19 +3,19 @@ package apps.in.live_event;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleOwner;
 
-class EventHandlerWrapper {
+class EventHandlerWrapper<T> {
 
-    private final EventHandler eventHandler;
+    private final EventHandler<T> eventHandler;
     private final LifecycleOwner lifecycleOwner;
     private final boolean mainThreadNeeded;
 
-    public EventHandlerWrapper(EventHandler eventHandler, LifecycleOwner lifecycleOwner, boolean mainThreadNeeded) {
+    public EventHandlerWrapper(EventHandler<T> eventHandler, LifecycleOwner lifecycleOwner, boolean mainThreadNeeded) {
         this.eventHandler = eventHandler;
         this.lifecycleOwner = lifecycleOwner;
         this.mainThreadNeeded = mainThreadNeeded;
     }
 
-    public EventHandler getEventHandler() {
+    public EventHandler<T> getEventHandler() {
         return eventHandler;
     }
 
